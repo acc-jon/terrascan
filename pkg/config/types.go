@@ -33,4 +33,7 @@ type PolicyConfig struct {
 	// policy git url and branch
 	RepoURL string
 	Branch  string
+
+	// path to suppression file
+	SuppressionPath string
 }

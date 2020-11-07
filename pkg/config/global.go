@@ -24,15 +24,16 @@ import (
 )
 
 const (
-	policyRepoURL    = "https://github.com/accurics/terrascan.git"
-	policyBranch     = "master"
-	configEnvvarName = "TERRASCAN_CONFIG"
-	policyConfigKey  = "policy"
+	policyRepoURL     = "https://github.com/accurics/terrascan.git"
+	policyBranch      = "master"
+	configEnvvarName  = "TERRASCAN_CONFIG"
+	policyConfigKey   = "policy"
+	defaultPolicyPath = "/pkg/policies/opa/rego"
 )
 
 var (
 	policyRepoPath       = os.Getenv("HOME") + "/.terrascan"
-	policyBasePath       = policyRepoPath + "/pkg/policies/opa/rego"
+	policyBasePath       = policyRepoPath + defaultPolicyPath
 	errTomlKeyNotPresent = fmt.Errorf("%s key not present in toml config", policyConfigKey)
 )
 
@@ -73,6 +74,9 @@ func LoadGlobalConfig(configFile string) {
 		if len(p.Policy.Branch) > 0 {
 			Global.Policy.Branch = p.Policy.Branch
 		}
+		if len(p.Policy.SuppressionPath) > 0 {
+			Global.Policy.SuppressionPath = p.Policy.SuppressionPath
+		}
 	}
 }
 
@@ -111,6 +115,9 @@ func loadConfigFile(configFile string) (GlobalConfig, error) {
 	// branch = git branch where policies are stored
 	p.Policy.Branch = str(keyTomlConfig.Get("branch"))
 
+	// suppression_file = path where suppression file is stored
+	p.Policy.SuppressionPath = str(keyTomlConfig.Get("suppression_path"))
+
 	return p, nil
 }
 
@@ -132,4 +139,9 @@ func GetPolicyRepoURL() string {
 // GetPolicyBranch returns policy repo url
 func GetPolicyBranch() string {
 	return Global.Policy.Branch
+}
+
+// GetSuppressionPath returns suppression file path
+func GetSuppressionPath() string {
+	return Global.Policy.SuppressionPath
 }

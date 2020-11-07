@@ -1,0 +1,10 @@
+{
+    "type": "terrascan-suppression-list",
+    "version": 1,
+    "suppressions": {
+        "hashes": [
+            "valid-hash-1",
+            "valid-hash-2"
+        ]
+    }
+}

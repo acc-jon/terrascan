@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/accurics/terrascan/pkg/iac-providers/output"
 	"github.com/accurics/terrascan/pkg/utils"
@@ -144,6 +145,17 @@ func (*TfV12) LoadIacDir(absRootDir string) (allResourcesConfig output.AllResour
 			if err != nil {
 				return allResourcesConfig, fmt.Errorf("failed to create ResourceConfig")
 			}
+
+			// Construct our relative location in the hierarchy
+			var locator []string
+
+			if current.Config.Parent != nil {
+				locator = current.Config.Parent.Path
+			}
+
+			locator = append(locator, current.Config.Path...)
+			locator = append(locator, resourceConfig.Name)
+			resourceConfig.Locator = strings.Join(locator, ".")
 
 			// resolve references
 			resourceConfig.Config = r.ResolveRefs(resourceConfig.Config.(jsonObj))

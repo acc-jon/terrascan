@@ -1,0 +1,6 @@
+{
+    "type": "terrascan",
+    "format-version": 1,
+    "suppressions": {
+    }
+}

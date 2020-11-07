@@ -18,18 +18,20 @@ package results
 
 // Violation Contains data for each violation
 type Violation struct {
-	RuleName     string      `json:"rule_name" yaml:"rule_name" xml:"rule_name,attr"`
-	Description  string      `json:"description" yaml:"description" xml:"description,attr"`
-	RuleID       string      `json:"rule_id" yaml:"rule_id" xml:"rule_id,attr"`
-	Severity     string      `json:"severity" yaml:"severity" xml:"severity,attr"`
-	Category     string      `json:"category" yaml:"category" xml:"category,attr"`
-	RuleFile     string      `json:"-" yaml:"-" xml:"-"`
-	RuleData     interface{} `json:"-" yaml:"-" xml:"-"`
-	ResourceName string      `json:"resource_name" yaml:"resource_name" xml:"resource_name,attr"`
-	ResourceType string      `json:"resource_type" yaml:"resource_type" xml:"resource_type,attr"`
-	ResourceData interface{} `json:"-" yaml:"-" xml:"-"`
-	File         string      `json:"file" yaml:"file" xml:"file,attr"`
-	LineNumber   int         `json:"line" yaml:"line" xml:"line,attr"`
+	RuleName        string      `json:"rule_name" yaml:"rule_name" xml:"rule_name,attr"`
+	Description     string      `json:"description" yaml:"description" xml:"description,attr"`
+	RuleID          string      `json:"rule_id" yaml:"rule_id" xml:"rule_id,attr"`
+	Severity        string      `json:"severity" yaml:"severity" xml:"severity,attr"`
+	Category        string      `json:"category" yaml:"category" xml:"category,attr"`
+	RuleFile        string      `json:"-" yaml:"-" xml:"-"`
+	RuleData        interface{} `json:"-" yaml:"-" xml:"-"`
+	ResourceName    string      `json:"resource_name" yaml:"resource_name" xml:"resource_name,attr"`
+	ResourceLocator string      `json:"resource_locator" yaml:"resource_locator" xml:"resource_locator,attr"`
+	ResourceType    string      `json:"resource_type" yaml:"resource_type" xml:"resource_type,attr"`
+	ResourceData    interface{} `json:"-" yaml:"-" xml:"-"`
+	File            string      `json:"file" yaml:"file" xml:"file,attr"`
+	LineNumber      int         `json:"line" yaml:"line" xml:"line,attr"`
+	Hash            string      `json:"hash" yaml:"hash" xml:"hash,attr"`
 }
 
 // ViolationStats Contains stats related to the violation data

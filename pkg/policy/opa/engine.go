@@ -35,6 +35,7 @@ import (
 	"github.com/accurics/terrascan/pkg/policy"
 
 	"github.com/accurics/terrascan/pkg/results"
+	"github.com/accurics/terrascan/pkg/suppressions"
 	"github.com/accurics/terrascan/pkg/utils"
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
@@ -266,6 +267,7 @@ func (e *Engine) Init(policyPath string) error {
 	// initialize ViolationStore
 	e.results.ViolationStore = results.NewViolationStore()
 
+	suppressions.LoadSuppressions()
 	return nil
 }
 
@@ -287,18 +289,20 @@ func (e *Engine) Release() error {
 // reportViolation Add a violation for a given resource
 func (e *Engine) reportViolation(regoData *RegoData, resource *output.ResourceConfig) {
 	violation := results.Violation{
-		RuleName:     regoData.Metadata.Name,
-		Description:  regoData.Metadata.Description,
-		RuleID:       regoData.Metadata.ReferenceID,
-		Severity:     regoData.Metadata.Severity,
-		Category:     regoData.Metadata.Category,
-		RuleFile:     regoData.Metadata.File,
-		RuleData:     regoData.RawRego,
-		ResourceName: resource.Name,
-		ResourceType: resource.Type,
-		ResourceData: resource.Config,
-		File:         resource.Source,
-		LineNumber:   resource.Line,
+		RuleName:        regoData.Metadata.Name,
+		Description:     regoData.Metadata.Description,
+		RuleID:          regoData.Metadata.ReferenceID,
+		Severity:        regoData.Metadata.Severity,
+		Category:        regoData.Metadata.Category,
+		RuleFile:        regoData.Metadata.File,
+		RuleData:        regoData.RawRego,
+		ResourceName:    resource.Name,
+		ResourceLocator: resource.Locator,
+		ResourceType:    resource.Type,
+		ResourceData:    resource.Config,
+		File:            resource.Source,
+		LineNumber:      resource.Line,
+		Hash:            suppressions.MakeHash(regoData.Metadata.ReferenceID, resource),
 	}
 
 	severity := regoData.Metadata.Severity
@@ -324,6 +328,13 @@ func (e *Engine) Evaluate(engineInput policy.EngineInput) (policy.EngineOutput, 
 
 	// Evaluate the policy against each resource type
 	for k := range e.regoDataMap {
+
+		// Don't evaluate suppressed policies
+		if suppressions.ShouldNotBeScanned(k, engineInput.InputData) {
+			zap.S().Debug("skiping suppressed query", zap.String("rule", "'"+k+"'"), zap.String("input", fmt.Sprintf("%v", (*engineInput.InputData))))
+			continue
+		}
+
 		// Execute the prepared query.
 		rs, err := e.regoDataMap[k].PreparedQuery.Eval(e.context, rego.EvalInput(engineInput.InputData))
 		if err != nil {
@@ -379,6 +390,12 @@ func (e *Engine) Evaluate(engineInput policy.EngineInput) (policy.EngineOutput, 
 			}
 			if resource == nil {
 				zap.S().Warn("resource was not found", zap.String("resource id", resourceID))
+				continue
+			}
+
+			// Don't report suppressed violations
+			if suppressions.IsSuppressed(k, resource) {
+				zap.S().Debug("suppessing violation for rule with rego", zap.String("rego", string("\n")+string(e.regoDataMap[k].RawRego)+string("\n")))
 				continue
 			}
 

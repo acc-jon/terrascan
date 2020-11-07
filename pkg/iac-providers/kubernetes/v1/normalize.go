@@ -120,6 +120,7 @@ func (k *K8sV1) normalize(doc *utils.IacDocument) (*output.ResourceConfig, error
 		return nil, err
 	}
 
+	resourceConfig.Locator = resourceConfig.ID
 	resourceConfig.Name = resource.Metadata.Name
 	resourceConfig.Config = configData
 
