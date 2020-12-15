@@ -1,5 +1,6 @@
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_FLAGS := -v -ldflags "-w -s"
+ENV_SETTINGS := CGO_ENABLED=0
 
 BUILD_DIR = ./bin
 BINARY_NAME = terrascan
@@ -17,6 +18,7 @@ help:
 	@echo "docker-build\n\tbuild terrascan docker image"
 	@echo "docker-push\n\tpush terrascan docker image"
 	@echo "docker-push-latest\n\tpush terrascan docker image with latest tag"
+	@echo "docker-push-latest-tag\n\tpush terrascan docker image with latest release tag"
 	@echo "gofmt\n\tvalidate gofmt"
 	@echo "golint\n\tvalidate golint"
 	@echo "gomodverify\n\tverify go modules"
@@ -30,11 +32,11 @@ help:
 build: clean
 	@mkdir -p $(BUILD_DIR) > /dev/null
 	@export GO111MODULE=on
-	go build ${BUILD_FLAGS} -o ${BUILD_DIR}/${BINARY_NAME} cmd/terrascan/main.go
+	${ENV_SETTINGS} go build ${BUILD_FLAGS} -o ${BUILD_DIR}/${BINARY_NAME} cmd/terrascan/main.go
 	@echo "binary created at ${BUILD_DIR}/${BINARY_NAME}"
 
 
-# clean build 
+# clean build
 clean:
 	@rm -rf $(BUILD_DIR)
 
@@ -94,3 +96,7 @@ docker-push:
 # push latest terrascan docker image
 docker-push-latest:
 	./scripts/docker-push-latest.sh
+
+# push release tag terrascan docker image
+docker-push-latest-tag:
+	./scripts/docker-push-latest-tag.sh
